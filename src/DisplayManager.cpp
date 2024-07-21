@@ -6,7 +6,6 @@
 #include "PeripheryManager.h"
 #include "MQTTManager.h"
 #include "GifPlayer.h"
-#include <Ticker.h>
 #include "timer.h"
 #include "Functions.h"
 #include "ServerManager.h"
@@ -1075,6 +1074,8 @@ void DisplayManager_::loadNativeApps()
   updateApp("Battery", BatApp, SHOW_BAT, 4);
 #endif
 
+  updateApp("Timer", TimerApp, SHOW_TIMER, 5);
+
   ui->setApps(Apps);
   setAutoTransition(true);
 }
@@ -1348,16 +1349,85 @@ void DisplayManager_::previousApp()
   }
 }
 
+time_t timerEndTime = 0;
+
+time_t DisplayManager_::getTimerEndTime()
+{
+  return timerEndTime;
+}
+
+void setTimerEndTime()
+{
+  auto duration = CONFIGURED_TIMERS_SECS - ELAPSED_TIMER_SECS;
+  time_t now = time(nullptr);
+  struct tm futureTimeinfo = *localtime(&now);
+  futureTimeinfo.tm_hour += duration / 3600;
+  futureTimeinfo.tm_min += (duration % 3600) / 60;
+  futureTimeinfo.tm_sec += duration % 60;
+  timerEndTime = mktime(&futureTimeinfo);
+}
+
 void DisplayManager_::selectButton()
 {
   if (!MenuManager.inMenu)
   {
     DisplayManager.getInstance().dismissNotify();
+	
+	  if (TIMER_ACTIVE)
+    {
+		  PeripheryManager.stopSound();
+		  TIMER_ACTIVE = false;
+	  }	
+    else
+    {
+      TIMER_ACTIVE = true;
+      setTimerEndTime();
+    }
   }
+}
+
+void DisplayManager_::configureTimer(String Payload)
+{
+    DynamicJsonDocument doc(1024);
+    DeserializationError error = deserializeJson(doc, Payload);
+    if (error)
+        return;
+    int hours = doc["hours"] | 0;
+    int minutes = doc["minutes"] | 0;
+    int seconds = doc["seconds"] | 0;
+    TIMER_SOUND = doc.containsKey("sound") ? doc["sound"].as<String>() : "";
+    CONFIGURED_TIMERS_SECS = seconds + minutes * 60 + hours * 3600;
+    ELAPSED_TIMER_SECS = 0;
 }
 
 void DisplayManager_::selectButtonLong()
 {
+  if (CURRENT_APP == "Timer")
+  {
+    // reset timer
+    TIMER_ACTIVE = false;
+    ELAPSED_TIMER_SECS = 0;
+  }
+}
+
+void DisplayManager_::leftButtonLong()
+{
+  if (CURRENT_APP == "Timer")
+  {
+    // add one minute
+    TIMER_ACTIVE = false;
+    CONFIGURED_TIMERS_SECS += 60;
+  }
+}
+
+void DisplayManager_::rightButtonLong()
+{
+  if (CURRENT_APP == "Timer")
+  {
+    // add one minute
+    TIMER_ACTIVE = false;
+    CONFIGURED_TIMERS_SECS -= 60;
+  }  
 }
 
 void DisplayManager_::dismissNotify()
@@ -1507,6 +1577,10 @@ std::pair<String, AppCallback> getNativeAppByName(const String &appName)
     return std::make_pair("Battery", BatApp);
   }
 #endif
+  else if (appName == "Timer")
+  {
+    return std::make_pair("Timer", TimerApp);
+  }
   return std::make_pair("", nullptr);
 }
 

@@ -147,6 +147,13 @@ void left_button_pressed()
     }
 }
 
+void left_button_pressed_long()
+{
+    DisplayManager.leftButtonLong();
+    if (DEBUG_MODE)
+        DEBUG_PRINTLN(F("Left button long clicked"));
+}
+
 void right_button_pressed()
 {
     if (!BLOCK_NAVIGATION)
@@ -164,6 +171,13 @@ void right_button_pressed()
         if (DEBUG_MODE)
             DEBUG_PRINTLN(F("Right button clicked but blocked"));
     }
+}
+
+void right_button_pressed_long()
+{
+    DisplayManager.rightButtonLong();
+    if (DEBUG_MODE)
+        DEBUG_PRINTLN(F("Right button long clicked"));
 }
 
 void select_button_pressed()
@@ -205,7 +219,10 @@ void select_button_pressed_long()
     }
     else if (!BLOCK_NAVIGATION)
     {
-        MenuManager.selectButtonLong();
+        if (CURRENT_APP != "Timer")
+        {
+            MenuManager.selectButtonLong();
+        }
         DisplayManager.selectButtonLong();
         if (DEBUG_MODE)
             DEBUG_PRINTLN(F("Select button pressed long"));
@@ -395,12 +412,16 @@ void PeripheryManager_::setup()
     {
         Serial.println("Button rotation");
         button_left.onPressed(right_button_pressed);
+        button_left.onPressedFor(1000, right_button_pressed_long);
         button_right.onPressed(left_button_pressed);
+        button_right.onPressedFor(1000, left_button_pressed_long);
     }
     else
     {
         button_left.onPressed(left_button_pressed);
+        button_left.onPressedFor(1000, left_button_pressed_long);
         button_right.onPressed(right_button_pressed);
+        button_right.onPressedFor(1000, right_button_pressed_long);
     }
 
     button_select.onPressed(select_button_pressed);

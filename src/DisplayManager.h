@@ -34,9 +34,13 @@ public:
     void checkNewYear();
     void leftButton();
     void resetTextColor();
+	void configureTimer(String);
+    time_t getTimerEndTime();
     void clearMatrix();
     void selectButton();
     void selectButtonLong();
+    void leftButtonLong();
+    void rightButtonLong();
     void setBrightness(int);
     bool generateNotification(uint8_t source, const char *json);
     bool generateCustomPage(const String &name, JsonObject doc, bool preventSave);

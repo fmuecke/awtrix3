@@ -181,6 +181,13 @@ void onMqttMessage(const char *topic, const uint8_t *payload, uint16_t length)
         delete[] payloadCopy;
         return;
     }
+	
+    if (strTopic.equals(MQTT_PREFIX + "/timer"))
+    {
+        DisplayManager.configureTimer(payloadCopy);
+        delete[] payloadCopy;
+        return;
+    }	
 
     if (strTopic.equals(MQTT_PREFIX + "/notify/dismiss"))
     {
@@ -372,6 +379,7 @@ void onMqttConnected()
         "/brightness",
         "/notify/dismiss",
         "/notify",
+		"/timer",
         "/custom/#",
         "/switch",
         "/settings",

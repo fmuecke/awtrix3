@@ -277,6 +277,72 @@ void HumApp(FastLED_NeoMatrix *matrix, MatrixDisplayUiState *state, int16_t x, i
     DisplayManager.matrixPrint("%");
 }
 
+void TimerApp(FastLED_NeoMatrix *matrix, MatrixDisplayUiState *state, int16_t x, int16_t y, GifPlayer *gifPlayer)
+{
+    if (notifyFlag)
+        return;
+
+    CURRENT_APP = "Timer";
+    currentCustomApp = "";
+
+    matrix->fillScreen(matrix->Color(0, 0, 0));
+    matrix->drawRGBBitmap(0, 0, icon_19105, 8, 8);
+
+    uint32_t textColor = TEXTCOLOR_888;
+    int timeLeft{0};
+
+	if (!TIMER_ACTIVE)
+    {
+        timeLeft = CONFIGURED_TIMERS_SECS - ELAPSED_TIMER_SECS;
+    }
+    else
+    {
+        time_t endTime = DisplayManager.getTimerEndTime();
+        time_t now = time(nullptr);
+        timeLeft = difftime(endTime, now);
+        ELAPSED_TIMER_SECS = CONFIGURED_TIMERS_SECS - timeLeft;
+        textColor = timeLeft <= 0 ? 0xFF0000 : 0x00FF00;
+        int progress = (timeLeft * 100 / CONFIGURED_TIMERS_SECS);
+        if (timeLeft > 0 && progress <= 20)
+        {
+            // textcolor yellow if 20% of time is up
+            textColor = 0xFFFF00;
+        }
+
+        DisplayManager.drawProgressBar(8, 7, progress, textColor, 0);
+    }
+
+    bool timeIsUp = timeLeft < 0;
+    if (timeIsUp)
+    {
+        timeLeft *= -1;
+    }
+    int hours = timeLeft / 3600;
+    int minutes = (timeLeft % 3600) / 60;
+    int seconds = timeLeft % 60;
+    char timeLeftStr[20];
+    if (hours > 0)
+    {
+        sprintf(timeLeftStr, timeIsUp ? "-%02d:%02d:%02d" : "%02d:%02d:%02d", hours, minutes, seconds);
+    }
+    else
+    {
+        sprintf(timeLeftStr, timeIsUp ? "-%02d:%02d" : "%02d:%02d", minutes, seconds);
+    }
+    uint16_t textWidth = getTextWidth(timeLeftStr, 0);
+    int16_t textX = ((32 - textWidth) / 2);
+    DisplayManager.setCursor(4 + textX, 6);
+    DisplayManager.setTextColor(textColor);
+    DisplayManager.matrixPrint(timeLeftStr);
+    // if (TIMER_SOUND != "")
+    // {
+    //     if (!PeripheryManager.isPlaying())
+    //     {
+    //         PeripheryManager.playFromFile(TIMER_SOUND);
+    //     }
+    // }
+}
+
 #ifndef awtrix2_upgrade
 void BatApp(FastLED_NeoMatrix *matrix, MatrixDisplayUiState *state, int16_t x, int16_t y, GifPlayer *gifPlayer)
 {

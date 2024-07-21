@@ -273,6 +273,7 @@ void loadSettings()
     SHOW_DATE = Settings.getBool("DAT", false);
     SHOW_TEMP = Settings.getBool("TEMP", true);
     SHOW_HUM = Settings.getBool("HUM", true);
+	SHOW_TIMER = Settings.getBool("TIMER", true);
     MATRIX_LAYOUT = Settings.getUInt("MAT", 0);
     SCROLL_SPEED = Settings.getUInt("SSPEED", 100);
 #ifdef ULANZI
@@ -323,6 +324,7 @@ void saveSettings()
     Settings.putBool("DAT", SHOW_DATE);
     Settings.putBool("TEMP", SHOW_TEMP);
     Settings.putBool("HUM", SHOW_HUM);
+	Settings.putBool("TIMER", SHOW_TIMER);
     Settings.putUInt("SSPEED", SCROLL_SPEED);
 #ifdef ULANZI
     Settings.putBool("BAT", SHOW_BAT);
@@ -354,6 +356,7 @@ bool SHOW_WEATHER = true;
 bool SHOW_BAT = true;
 bool SHOW_TEMP = true;
 bool SHOW_HUM = true;
+bool SHOW_TIMER = true;
 bool SHOW_SECONDS = true;
 bool SHOW_WEEKDAY = true;
 String NET_IP = "192.168.178.10";
@@ -377,6 +380,8 @@ uint8_t TEMP_SENSOR_TYPE = TEMP_SENSOR_TYPE_NONE;
 
 float CURRENT_HUM;
 float CURRENT_LUX;
+int CONFIGURED_TIMERS_SECS = 0;
+int ELAPSED_TIMER_SECS = 0;
 int BRIGHTNESS = 120;
 int BRIGHTNESS_PERCENT;
 
@@ -397,12 +402,15 @@ String DATE_FORMAT = "%d.%m.%y";
 int BACKGROUND_EFFECT = -1;
 bool START_ON_MONDAY;
 
+String TIMER_SOUND = "";
+
 // Matrix States
 bool AUTO_TRANSITION = false;
 bool AUTO_BRIGHTNESS = true;
 bool UPPERCASE_LETTERS = true;
 bool AP_MODE;
 bool MATRIX_OFF;
+bool TIMER_ACTIVE;
 bool MIRROR_DISPLAY = false;
 uint32_t TEXTCOLOR_888 = 0xFFFFFF;
 bool SOUND_ACTIVE;
