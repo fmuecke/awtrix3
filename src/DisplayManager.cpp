@@ -1392,11 +1392,17 @@ void DisplayManager_::configureTimer(String Payload)
     DeserializationError error = deserializeJson(doc, Payload);
     if (error)
         return;
-    int hours = doc["hours"] | 0;
-    int minutes = doc["minutes"] | 0;
-    int seconds = doc["seconds"] | 0;
+    //TODO
+    // if (doc.containsKey("duration"))
+    // {
+    //     CONFIGURED_TIMERS_SECS = doc["duration"].as<int>();
+    //     ELAPSED_TIMER_SECS = 0;
+    //     TIMER_ACTIVE = false;
+    // }
+    int duration = doc["duration"] | 0;
+    //TODO: bool showProgress = doc["showProgress"] | true;
     TIMER_SOUND = doc.containsKey("sound") ? doc["sound"].as<String>() : "";
-    CONFIGURED_TIMERS_SECS = seconds + minutes * 60 + hours * 3600;
+    CONFIGURED_TIMERS_SECS = duration;
     ELAPSED_TIMER_SECS = 0;
 }
 
