@@ -286,8 +286,6 @@ void TimerApp(FastLED_NeoMatrix *matrix, MatrixDisplayUiState *state, int16_t x,
     currentCustomApp = "";
 
     matrix->fillScreen(matrix->Color(0, 0, 0));
-    matrix->drawRGBBitmap(0, 0, icon_19105, 8, 8);
-
     uint32_t textColor = TEXTCOLOR_888;
     int timeLeft{0};
 
@@ -301,11 +299,13 @@ void TimerApp(FastLED_NeoMatrix *matrix, MatrixDisplayUiState *state, int16_t x,
         time_t now = time(nullptr);
         timeLeft = difftime(endTime, now);
         ELAPSED_TIMER_SECS = CONFIGURED_TIMERS_SECS - timeLeft;
-        textColor = timeLeft <= 0 ? 0xFF0000 : 0x00FF00;
         int progress = (timeLeft * 100 / CONFIGURED_TIMERS_SECS);
-        if (timeLeft > 0 && progress <= 20)
+        if (timeLeft <= 0)
         {
-            // textcolor yellow if 20% of time is up
+            textColor = 0xFF0000;
+        }
+        else if (progress <= 20)
+        {
             textColor = 0xFFFF00;
         }
 
@@ -323,7 +323,8 @@ void TimerApp(FastLED_NeoMatrix *matrix, MatrixDisplayUiState *state, int16_t x,
     char timeLeftStr[20];
     if (hours > 0)
     {
-        sprintf(timeLeftStr, timeIsUp ? "-%02d:%02d:%02d" : "%02d:%02d:%02d", hours, minutes, seconds);
+        sprintf(timeLeftStr, timeIsUp ? "-%d:%02d:%02d" : "%d:%02d:%02d", hours, minutes, seconds);
+        // TODO: fix display of hours together with icon
     }
     else
     {
@@ -331,9 +332,20 @@ void TimerApp(FastLED_NeoMatrix *matrix, MatrixDisplayUiState *state, int16_t x,
     }
     uint16_t textWidth = getTextWidth(timeLeftStr, 0);
     int16_t textX = ((32 - textWidth) / 2);
-    DisplayManager.setCursor(4 + textX, 6);
-    DisplayManager.setTextColor(textColor);
-    DisplayManager.matrixPrint(timeLeftStr);
+    if (timeIsUp && timer_time() + 1 % 2)
+    {
+        matrix->fillScreen(matrix->Color(255,0,0));
+        DisplayManager.setTextColor(0);
+        DisplayManager.printText(0, 6, "Time's up!", true, 0);
+    }
+    else
+    {
+        matrix->drawRGBBitmap(0, 0, timeIsUp ? icon_61723 : icon_19105, 8, 8);
+        DisplayManager.setCursor(4 + textX, 6);
+        DisplayManager.setTextColor(textColor);
+        DisplayManager.matrixPrint(timeLeftStr);
+    }
+
     // if (TIMER_SOUND != "")
     // {
     //     if (!PeripheryManager.isPlaying())
