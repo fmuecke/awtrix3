@@ -21,6 +21,7 @@
 #include <HTTPClient.h>
 #include "base64.hpp"
 #include "GameManager.h"
+#include "TimerManager.h"
 
 unsigned long lastArtnetStatusTime = 0;
 const int numberOfChannels = 256 * 3;
@@ -1313,13 +1314,31 @@ void DisplayManager_::show()
 void DisplayManager_::leftButton()
 {
   if (!MenuManager.inMenu)
-    ui->previousApp();
+  {
+    if (CURRENT_APP == "Timer" && (TimerManager.isActive() || TimerManager.isEditMode()))
+    {
+      TimerManager.leftButton();
+    }
+    else
+    {
+      ui->previousApp();
+    }
+  }
 }
 
 void DisplayManager_::rightButton()
 {
   if (!MenuManager.inMenu)
-    ui->nextApp();
+  {
+    if (CURRENT_APP == "Timer" && (TimerManager.isActive() || TimerManager.isEditMode()))
+    {
+      TimerManager.rightButton();
+    }
+    else
+    {
+      ui->nextApp();
+    }
+  }
 }
 
 void DisplayManager_::nextApp()
@@ -1349,22 +1368,20 @@ void DisplayManager_::previousApp()
   }
 }
 
-time_t timerEndTime = 0;
-
-time_t DisplayManager_::getTimerEndTime()
+void DisplayManager_::leftButtonLong()
 {
-  return timerEndTime;
+  if (CURRENT_APP == "Timer")
+  {
+    TimerManager.leftButtonLong();
+  }
 }
 
-void setTimerEndTime()
+void DisplayManager_::rightButtonLong()
 {
-  auto duration = CONFIGURED_TIMERS_SECS - ELAPSED_TIMER_SECS;
-  time_t now = time(nullptr);
-  struct tm futureTimeinfo = *localtime(&now);
-  futureTimeinfo.tm_hour += duration / 3600;
-  futureTimeinfo.tm_min += (duration % 3600) / 60;
-  futureTimeinfo.tm_sec += duration % 60;
-  timerEndTime = mktime(&futureTimeinfo);
+  if (CURRENT_APP == "Timer")
+  {
+    TimerManager.rightButtonLong();
+  }  
 }
 
 void DisplayManager_::selectButton()
@@ -1373,67 +1390,19 @@ void DisplayManager_::selectButton()
   {
     DisplayManager.getInstance().dismissNotify();
 	
-	  if (TIMER_ACTIVE)
+	  if (CURRENT_APP == "Timer")
     {
-		  PeripheryManager.stopSound();
-		  TIMER_ACTIVE = false;
-	  }	
-    else
-    {
-      TIMER_ACTIVE = true;
-      setTimerEndTime();
-    }
+      TimerManager.selectButton();
+    } 
   }
-}
-
-void DisplayManager_::configureTimer(String Payload)
-{
-    DynamicJsonDocument doc(1024);
-    DeserializationError error = deserializeJson(doc, Payload);
-    if (error)
-        return;
-    //TODO
-    // if (doc.containsKey("duration"))
-    // {
-    //     CONFIGURED_TIMERS_SECS = doc["duration"].as<int>();
-    //     ELAPSED_TIMER_SECS = 0;
-    //     TIMER_ACTIVE = false;
-    // }
-    int duration = doc["duration"] | 0;
-    //TODO: bool showProgress = doc["showProgress"] | true;
-    TIMER_SOUND = doc.containsKey("sound") ? doc["sound"].as<String>() : "";
-    CONFIGURED_TIMERS_SECS = duration;
-    ELAPSED_TIMER_SECS = 0;
 }
 
 void DisplayManager_::selectButtonLong()
 {
   if (CURRENT_APP == "Timer")
   {
-    // reset timer
-    TIMER_ACTIVE = false;
-    ELAPSED_TIMER_SECS = 0;
+    TimerManager.selectButtonLong();
   }
-}
-
-void DisplayManager_::leftButtonLong()
-{
-  if (CURRENT_APP == "Timer")
-  {
-    // add one minute
-    TIMER_ACTIVE = false;
-    CONFIGURED_TIMERS_SECS += 60;
-  }
-}
-
-void DisplayManager_::rightButtonLong()
-{
-  if (CURRENT_APP == "Timer")
-  {
-    // add one minute
-    TIMER_ACTIVE = false;
-    CONFIGURED_TIMERS_SECS -= 60;
-  }  
 }
 
 void DisplayManager_::dismissNotify()

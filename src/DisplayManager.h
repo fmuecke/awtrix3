@@ -34,8 +34,6 @@ public:
     void checkNewYear();
     void leftButton();
     void resetTextColor();
-	void configureTimer(String);
-    time_t getTimerEndTime();
     void clearMatrix();
     void selectButton();
     void selectButtonLong();

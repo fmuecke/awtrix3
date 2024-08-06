@@ -6,6 +6,7 @@
 #include "Functions.h"
 #include "MenuManager.h"
 #include "PeripheryManager.h"
+#include "TimerManager.h"
 #include <WiFi.h>
 #include "effects.h"
 #include "MQTTManager.h"
@@ -287,19 +288,11 @@ void TimerApp(FastLED_NeoMatrix *matrix, MatrixDisplayUiState *state, int16_t x,
 
     matrix->fillScreen(matrix->Color(0, 0, 0));
     uint32_t textColor = TEXTCOLOR_888;
-    int timeLeft{0};
-
-	if (!TIMER_ACTIVE)
+    int timeLeft = TimerManager.calcAndUpdateRemainingSecs();
+    
+	if (TimerManager.isActive())
     {
-        timeLeft = CONFIGURED_TIMERS_SECS - ELAPSED_TIMER_SECS;
-    }
-    else
-    {
-        time_t endTime = DisplayManager.getTimerEndTime();
-        time_t now = time(nullptr);
-        timeLeft = difftime(endTime, now);
-        ELAPSED_TIMER_SECS = CONFIGURED_TIMERS_SECS - timeLeft;
-        int progress = (timeLeft * 100 / CONFIGURED_TIMERS_SECS);
+        int progress = TimerManager.getConfiguredSecs() ? (timeLeft * 100 / TimerManager.getConfiguredSecs()) : 0;
         if (timeLeft <= 0)
         {
             textColor = 0xFF0000;
@@ -312,7 +305,7 @@ void TimerApp(FastLED_NeoMatrix *matrix, MatrixDisplayUiState *state, int16_t x,
         DisplayManager.drawProgressBar(8, 7, progress, textColor, 0);
     }
 
-    bool timeIsUp = timeLeft < 0;
+    bool timeIsUp = timeLeft <= 0;
     if (timeIsUp)
     {
         timeLeft *= -1;
@@ -321,18 +314,31 @@ void TimerApp(FastLED_NeoMatrix *matrix, MatrixDisplayUiState *state, int16_t x,
     int minutes = (timeLeft % 3600) / 60;
     int seconds = timeLeft % 60;
     char timeLeftStr[20];
-    if (hours > 0)
+    if (TimerManager.isEditMode())
     {
-        sprintf(timeLeftStr, timeIsUp ? "-%d:%02d:%02d" : "%d:%02d:%02d", hours, minutes, seconds);
-        // TODO: fix display of hours together with icon
+        sprintf(timeLeftStr, "%d:%02d:%02d", hours, minutes, seconds);
     }
     else
     {
-        sprintf(timeLeftStr, timeIsUp ? "-%02d:%02d" : "%02d:%02d", minutes, seconds);
+        if (hours > 0)
+        {
+            sprintf(timeLeftStr, timeIsUp ? "-%d:%02d:%02d" : "%d:%02d:%02d", hours, minutes, seconds);
+            // note: negative time string is too long to display if icon is displayed
+        }
+        else
+        {
+            if (minutes > 9)
+            {
+                sprintf(timeLeftStr, timeIsUp ? "-%d:%02d" : "%d:%02d", minutes, seconds);
+            }
+            else
+            {
+                sprintf(timeLeftStr, timeIsUp ? "-%02d:%02d" : "%02d:%02d", minutes, seconds);
+            }
+        }
     }
-    uint16_t textWidth = getTextWidth(timeLeftStr, 0);
-    int16_t textX = ((32 - textWidth) / 2);
-    if (timeIsUp && timer_time() + 1 % 2)
+
+    if (TimerManager.isActive() && timeIsUp && (millis() / 1000) % 2)
     {
         matrix->fillScreen(matrix->Color(255,0,0));
         DisplayManager.setTextColor(0);
@@ -340,19 +346,61 @@ void TimerApp(FastLED_NeoMatrix *matrix, MatrixDisplayUiState *state, int16_t x,
     }
     else
     {
-        matrix->drawRGBBitmap(0, 0, timeIsUp ? icon_61723 : icon_19105, 8, 8);
-        DisplayManager.setCursor(4 + textX, 6);
+        uint16_t textWidth = getTextWidth(timeLeftStr, 0);
+        int16_t textX = ((32 - textWidth) / 2);
+
+        if (timeIsUp) 
+        {
+            DisplayManager.setCursor(textX, 6);
+        }
+        else
+        {
+            matrix->drawRGBBitmap(0, 0, icon_19105, 8, 8);
+            DisplayManager.setCursor(4 + textX, 6);
+        }
+
         DisplayManager.setTextColor(textColor);
         DisplayManager.matrixPrint(timeLeftStr);
     }
 
-    // if (TIMER_SOUND != "")
-    // {
-    //     if (!PeripheryManager.isPlaying())
-    //     {
-    //         PeripheryManager.playFromFile(TIMER_SOUND);
-    //     }
-    // }
+    // play RTTTL sound once when timer is up
+    if (timeIsUp && !TimerManager.isEditMode() && !TimerManager.wasSoundPlayed())
+    {
+        TimerManager.setSoundPlayed(true);
+        if (TIMER_SOUND != "")
+        {
+            PeripheryManager.playRTTTLString(TIMER_SOUND);
+        }
+        else
+        {
+            PeripheryManager.playRTTTLString("short:d=4,o=5,b=240:c6,8p,c6");
+        }
+    }
+
+    // make active digit blinking in edit mode
+    if (TimerManager.isEditMode() && (millis() / 333) % 2)
+    {
+        if (TimerManager.getEditPos() == 0)
+        {
+            DisplayManager.drawFilledRect(28, 1, 3, 5, 0x000000);
+        }
+        else if (TimerManager.getEditPos() == 1)
+        {
+            DisplayManager.drawFilledRect(24, 1, 3, 5, 0x000000);
+        }
+        else if (TimerManager.getEditPos() == 2)
+        {
+            DisplayManager.drawFilledRect(18, 1, 3, 5, 0x000000);
+        }
+        else if (TimerManager.getEditPos() == 3)
+        {
+            DisplayManager.drawFilledRect(14, 1, 3, 5, 0x000000);
+        }
+        else if (TimerManager.getEditPos() == 4)
+        {
+            DisplayManager.drawFilledRect(8, 1, 3, 5, 0x000000);
+        }
+    }
 }
 
 #ifndef awtrix2_upgrade

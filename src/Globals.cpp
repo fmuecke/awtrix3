@@ -273,7 +273,7 @@ void loadSettings()
     SHOW_DATE = Settings.getBool("DAT", false);
     SHOW_TEMP = Settings.getBool("TEMP", true);
     SHOW_HUM = Settings.getBool("HUM", true);
-	SHOW_TIMER = Settings.getBool("TIMER", true);
+    SHOW_TIMER = Settings.getBool("TIMER", true);
     MATRIX_LAYOUT = Settings.getUInt("MAT", 0);
     SCROLL_SPEED = Settings.getUInt("SSPEED", 100);
 #ifdef ULANZI
@@ -380,8 +380,6 @@ uint8_t TEMP_SENSOR_TYPE = TEMP_SENSOR_TYPE_NONE;
 
 float CURRENT_HUM;
 float CURRENT_LUX;
-int CONFIGURED_TIMERS_SECS = 0;
-int ELAPSED_TIMER_SECS = 0;
 int BRIGHTNESS = 120;
 int BRIGHTNESS_PERCENT;
 
@@ -410,7 +408,6 @@ bool AUTO_BRIGHTNESS = true;
 bool UPPERCASE_LETTERS = true;
 bool AP_MODE;
 bool MATRIX_OFF;
-bool TIMER_ACTIVE;
 bool MIRROR_DISPLAY = false;
 uint32_t TEXTCOLOR_888 = 0xFFFFFF;
 bool SOUND_ACTIVE;
