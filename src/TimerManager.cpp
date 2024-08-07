@@ -100,6 +100,16 @@ void TimerManager_::configureTimer(String Payload)
     _configuredTotalSeconds = doc["duration"] | TIMERMANAGER_DEFAULT_DURATION;
     _elapsedTotalSeconds = 0;
   }
+
+  if (doc.containsKey("start_now") && (doc["start_now"] | true))
+  {
+    _start();
+  }
+  else
+  {
+    _stop();
+  }
+
   //TODO: bool showProgress = doc["showProgress"] | true;
   TIMER_SOUND = doc.containsKey("sound") ? doc["sound"].as<String>() : "";
 }
