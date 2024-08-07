@@ -11,6 +11,18 @@ TimerManager_ &TimerManager_::getInstance()
 
 TimerManager_ &TimerManager = TimerManager.getInstance();
 
+void TimerManager_::_start()
+{
+  _isActive = true;
+  setEndTime();
+}
+
+void TimerManager_::_stop()
+{
+  _isActive = false;
+}
+
+
 void TimerManager_::rightButton()
 {
   if (isEditMode())   
@@ -62,13 +74,11 @@ void TimerManager_::selectButton()
     // start or stop timer
     if (isActive())
     {
-      _isActive = false;
-      //PeripheryManager.stopSound();
+      _stop();
     }	
     else
     {
-      _isActive = true;
-      setEndTime();
+      _start();
     }
   }
 }
@@ -89,7 +99,6 @@ void TimerManager_::configureTimer(String Payload)
   {
     _configuredTotalSeconds = doc["duration"] | TIMERMANAGER_DEFAULT_DURATION;
     _elapsedTotalSeconds = 0;
-    _isActive = false;
   }
   //TODO: bool showProgress = doc["showProgress"] | true;
   TIMER_SOUND = doc.containsKey("sound") ? doc["sound"].as<String>() : "";
@@ -157,7 +166,7 @@ void TimerManager_::toggleEditMode()
 
 void TimerManager_::reset()
 {
-  _isActive = false;
+  _stop();
   _elapsedTotalSeconds = 0;
   _wasSoundPlayed = false;
   _isEditMode = false;

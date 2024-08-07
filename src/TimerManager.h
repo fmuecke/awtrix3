@@ -17,6 +17,9 @@ class TimerManager_
     bool _wasSoundPlayed{ false };
     uint8_t _editPos{ 2 };  // default position: minutes
 
+    void _start();
+    void _stop();
+
 public:
     static TimerManager_& getInstance();
 

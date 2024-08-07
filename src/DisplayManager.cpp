@@ -1392,6 +1392,7 @@ void DisplayManager_::selectButton()
 	
 	  if (CURRENT_APP == "Timer")
     {
+      PeripheryManager.stopSound(); // TODO: move to TimerManager
       TimerManager.selectButton();
     } 
   }

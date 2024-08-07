@@ -287,17 +287,19 @@ void TimerApp(FastLED_NeoMatrix *matrix, MatrixDisplayUiState *state, int16_t x,
     currentCustomApp = "";
 
     matrix->fillScreen(matrix->Color(0, 0, 0));
-    uint32_t textColor = TEXTCOLOR_888;
     int timeLeft = TimerManager.calcAndUpdateRemainingSecs();
-    
-	if (TimerManager.isActive())
+    bool timeIsUp = timeLeft <= 0;
+    bool isNegative = timeLeft < 0;
+    if (isNegative)
+    {
+        timeLeft *= -1;
+    }
+    uint32_t textColor = timeIsUp ? 0xFF0000 : TEXTCOLOR_888;
+
+	if (TimerManager.isActive() && !timeIsUp)
     {
         int progress = TimerManager.getConfiguredSecs() ? (timeLeft * 100 / TimerManager.getConfiguredSecs()) : 0;
-        if (timeLeft <= 0)
-        {
-            textColor = 0xFF0000;
-        }
-        else if (progress <= 20)
+        if (progress <= 20)
         {
             textColor = 0xFFFF00;
         }
@@ -305,11 +307,6 @@ void TimerApp(FastLED_NeoMatrix *matrix, MatrixDisplayUiState *state, int16_t x,
         DisplayManager.drawProgressBar(8, 7, progress, textColor, 0);
     }
 
-    bool timeIsUp = timeLeft <= 0;
-    if (timeIsUp)
-    {
-        timeLeft *= -1;
-    }
     int hours = timeLeft / 3600;
     int minutes = (timeLeft % 3600) / 60;
     int seconds = timeLeft % 60;
@@ -322,19 +319,12 @@ void TimerApp(FastLED_NeoMatrix *matrix, MatrixDisplayUiState *state, int16_t x,
     {
         if (hours > 0)
         {
-            sprintf(timeLeftStr, timeIsUp ? "-%d:%02d:%02d" : "%d:%02d:%02d", hours, minutes, seconds);
+            sprintf(timeLeftStr, isNegative ? "-%d:%02d:%02d" : "%d:%02d:%02d", hours, minutes, seconds);
             // note: negative time string is too long to display if icon is displayed
         }
         else
         {
-            if (minutes > 9)
-            {
-                sprintf(timeLeftStr, timeIsUp ? "-%d:%02d" : "%d:%02d", minutes, seconds);
-            }
-            else
-            {
-                sprintf(timeLeftStr, timeIsUp ? "-%02d:%02d" : "%02d:%02d", minutes, seconds);
-            }
+            sprintf(timeLeftStr, isNegative ? "-%02d:%02d" : "%02d:%02d", minutes, seconds);
         }
     }
 
