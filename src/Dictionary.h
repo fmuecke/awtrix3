@@ -147,6 +147,8 @@ extern const char LDRRawKey[];
 extern const char BrightnessKey[];
 extern const char TempKey[];
 extern const char HumKey[];
+extern const char TimerSecondsKey[];
+extern const char TimerElapsedKey[];
 extern const char UpTimeKey[];
 extern const char SignalStrengthKey[];
 extern const char UpdateKey[];

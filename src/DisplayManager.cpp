@@ -1662,6 +1662,8 @@ String DisplayManager_::getStats()
     doc[TempKey] = formattedTemp;
     doc[HumKey] = static_cast<uint8_t>(CURRENT_HUM);
   }
+  doc[TimerSecondsKey] = TimerManager.getConfiguredSecs();
+  doc[TimerElapsedKey] = TimerManager.getElapsedSecs();
   doc[UpTimeKey] = PeripheryManager.readUptime();
   doc[SignalStrengthKey] = WiFi.RSSI();
   doc[MessagesKey] = RECEIVED_MESSAGES;
@@ -1673,6 +1675,7 @@ String DisplayManager_::getStats()
   doc[F("uid")] = uniqueID;
   doc[F("matrix")] = !MATRIX_OFF;
   doc[IpAddrKey] = WiFi.localIP();
+  
   String jsonString;
   serializeJson(doc, jsonString);
   return jsonString;
@@ -2061,6 +2064,7 @@ String DisplayManager_::getSettings()
   doc["DAT"] = SHOW_DATE;
   doc["HUM"] = SHOW_HUM;
   doc["TEMP"] = SHOW_TEMP;
+  doc["TIMER"] = SHOW_TIMER;
   doc["BAT"] = SHOW_BAT;
   doc["VOL"] = SOUND_VOLUME;
   doc["OVERLAY"] = getOverlayName();
@@ -2124,6 +2128,7 @@ void DisplayManager_::setNewSettings(const char *json)
   SHOW_HUM = doc.containsKey("HUM") ? doc["HUM"].as<bool>() : SHOW_HUM;
   SHOW_TEMP = doc.containsKey("TEMP") ? doc["TEMP"].as<bool>() : SHOW_TEMP;
   SHOW_BAT = doc.containsKey("BAT") ? doc["BAT"].as<bool>() : SHOW_BAT;
+  SHOW_TIMER = doc.containsKey("TIMER") ? doc["TIMER"].as<bool>() : SHOW_TIMER;
 
   if (doc.containsKey("VOL"))
   {
