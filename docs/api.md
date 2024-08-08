@@ -147,6 +147,46 @@ Colored indicators serve as small notification signs displayed on specific areas
 - **Blinking**: To make the indicator blink, add the key `"blink"` with a value specifying the blinking interval in milliseconds.
 - **Fading**: To make the indicator fade on and off, add the key `"fade"` with a value specifying the fade interval in milliseconds.
 
+## Timer App
+
+The built in timer app can be configured with the following api:
+
+| MQTT Topic        | HTTP URL                      | Payload/Body       | HTTP Method |
+| ------------------| ----------------------------- | ------------------ | ----------- |
+| `[PREFIX]/timer`  | `http://[IP]/api/timer`       | see below          | POST        |
+
+**Example:**
+```json
+{
+  "duration": 180,
+  "start_now": true
+}
+```
+This will configure the timer for 180 seconds (3 minutes) and start it right away. Be sure that the app is active or the timer will run in the background (use `api/switch` command).
+
+**Manually controling the timer**
+
+Normal operating mode:
+
+| Button        | Action          |
+| ------------- | --------------- |
+| select        | start/stop      |
+| right (long)  | reset           |
+| select (long) | enter edit mode |
+
+Edit mode:
+
+| Button        | Action                             |
+| ------------- | ---------------------------------- |
+| select        | leave edit mode                    |
+| right         | add 1 to current digit             |
+| left          | remove 1 from current digit        |
+| right (long)  | move selection cursor to the right |
+| select (long) | move selection cursor to the left  |
+
+> **Note:** In the edit mode, the currently selected digit is blinking.
+
+
 ## Custom Apps and Notifications
 
 With AWTRIX 3, you can design custom apps or notifications to showcase your unique text and icons.
@@ -394,6 +434,7 @@ You can adjust each property in the JSON object according to your preferences. I
 | `HUM`         | boolean                   | Enable or disable the native humidity app (requires reboot).                                        | `true`/`false`                                     | true    |
 | `TEMP`        | boolean                   | Enable or disable the native temperature app (requires reboot).                                     | `true`/`false`                                     | true    |
 | `BAT`         | boolean                   | Enable or disable the native battery app (requires reboot).                                         | `true`/`false`                                     | true    |
+| `TIMER`       | boolean                   | Enable or disable the native timer app (requires reboot).                                           | `true`/`false`                                     | true    |
 | `MATP`        | boolean                   | Enable or disable the matrix. Similar to `power` Endpoint but without the animation.                | `true`/`false`                                     | true    |
 | `VOL`         | integer                   | Allows to set the Volume of the Buzzer and DFplayer                                                 | 0-30                                               | true    |
 | `OVERLAY`     | string                    | Sets a global effect overlay (cannot be used with app specific overlays)                            | Varies (see below)                                 | N/A     |
