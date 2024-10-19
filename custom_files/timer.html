@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Timer</title>
+    <style>
+        /* General body styling for mobile */
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            margin: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        /* Input and button styling */
+        label, input, button {
+            display: block;
+            width: 100%;
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .presetButton {
+            display: inline-block;
+            width: 48%;
+            padding: 10px;
+            margin: 5px 1%;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-align: center;
+        }
+
+        .presetButton:hover {
+            background-color: #0056b3;
+        }
+
+        /* Add a bit of space between sections */
+        br {
+            margin-bottom: 15px;
+        }
+
+        /* Ensure content looks good on smaller screens */
+        @media only screen and (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .presetButton {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Configure Timer</h1>
+
+    <label for="duration">Custom Duration (seconds):</label>
+    <input type="number" id="duration" name="duration" min="0" required>
+    <button id="sendCustomRequest">Set Custom Timer</button>
+    <br><br>
+
+    <h2>Or Select a Preset Duration:</h2>
+    <button class="presetButton" data-duration="60">1 Minute</button>
+    <button class="presetButton" data-duration="120">2 Minutes</button>
+    <button class="presetButton" data-duration="180">3 Minutes</button>
+    <button class="presetButton" data-duration="300">5 Minutes</button><br/><br/>
+    <button class="presetButton" data-duration="600">10 Minutes</button>
+    <button class="presetButton" data-duration="900">15 Minutes</button>
+    <button class="presetButton" data-duration="1800">30 Minutes</button>
+
+    <script>
+        // Function to send POST request
+        function sendRequest(duration) {
+            const data = {
+                "duration": parseInt(duration, 10),
+                "start_now": true
+            };
+
+            // Send POST request to the current server's IP
+            fetch('http://' + window.location.hostname + '/api/timer', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => { console.log('Success:', data); })
+            .catch((error) => { console.error('Error:', error); });
+        }
+
+        // Event listener for the custom duration input button
+        document.getElementById('sendCustomRequest').addEventListener('click', function () {
+            const durationValue = document.getElementById('duration').value;
+
+            if (!durationValue) {
+                alert('Please enter a duration.');
+                return;
+            }
+
+            sendRequest(durationValue);
+        });
+
+        // Event listeners for preset duration buttons
+        const presetButtons = document.querySelectorAll('.presetButton');
+        presetButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const presetDuration = this.getAttribute('data-duration');
+                sendRequest(presetDuration);
+            });
+        });
+    </script>
+</body>
+</html>
